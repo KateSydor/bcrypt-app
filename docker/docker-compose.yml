@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  database:
+    image: postgres
+    hostname: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./db/db.env
+    volumes:
+      - ./db/postgres-data/:/var/lib/postgresql/data
+  bcrypt-1:
+    image: bcrypt-server
+    hostname: bcrypt-1
+    expose:
+      - 8080
+    env_file:
+      - ./server/server.env
+  bcrypt-2:
+    image: bcrypt-server
+    hostname: bcrypt-2
+    expose:
+      - 8080
+    env_file:
+      - ./server/server.env
+  nginx:
+    build: ./load-balancer
+    ports:
+      - "8080:80"
+    depends_on:
+      - bcrypt-1
+      - bcrypt-2
