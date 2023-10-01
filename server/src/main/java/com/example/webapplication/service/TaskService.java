@@ -20,10 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,9 +38,14 @@ public class TaskService {
     private final BCryptService bCryptService;
 
 
+    public Set<String> getActiveTaskIds() {
+        return ASYNC_TASKS.keySet();
+    }
+
     public TaskCreationResponse accept(BCryptRequest bcryptRequest) {
+        log.info("accept({})", bcryptRequest);
         try {
-            var task = saveNewTask();
+            var task = saveNewTask(bcryptRequest.getOriginalPasswords().size());
             var progress = new ProgressModel(bcryptRequest.getOriginalPasswords().size(), 0);
             var submittedTask = TASK_EXECUTORS.submit(() -> processTask(task, bcryptRequest));
             ASYNC_TASKS.put(task.getTaskId(), new TaskModel(submittedTask, progress));
@@ -54,21 +56,27 @@ public class TaskService {
     }
 
     public TaskCancelResponse cancel(String taskId) {
+        cancelTask(taskId);
+        cancelTaskLocal(taskId);
+        return new TaskCancelResponse(taskId, true, "Task " + taskId + " canceled.");
+    }
+
+    public void cancelTaskLocal(String taskId) {
+        log.info("cancelTaskLocal({})", taskId);
         TaskModel taskModel = ASYNC_TASKS.get(taskId);
         if (taskModel != null) {
             taskModel.cancel();
             ASYNC_TASKS.remove(taskId);
-            cancelTask(taskId);
-            return new TaskCancelResponse(taskId, true, "Task " + taskId + " canceled.");
         } else {
-            return new TaskCancelResponse(taskId, false, "Task was not found");
+            log.info("Task with id={} doesn't present on current instance", taskId);
         }
     }
 
     public ResponseEntity<?> progress(String taskId) {
-        TaskModel taskModel = ASYNC_TASKS.get(taskId);
-        if (taskModel != null) {
-            return ResponseEntity.ok(taskModel.getProgress());
+        log.info("progress({})", taskId);
+        ProgressModel progressModel = taskRepository.getProgress(taskId, TaskStatus.CANCELED);
+        if (progressModel != null) {
+            return ResponseEntity.ok(progressModel);
         } else {
             return ResponseEntity.badRequest().body(new ApiError(HttpStatus.BAD_REQUEST.value(), "Task was not found"));
         }
@@ -77,31 +85,32 @@ public class TaskService {
     private void processTask(TaskEntity taskEntity, BCryptRequest bCryptRequest) {
         var task = startTask(taskEntity.getId());
 
-        var bcryptEntities = bCryptRequest.getOriginalPasswords()
+        bCryptRequest.getOriginalPasswords()
                 .stream()
                 .map(pass -> bCryptService.encode(pass, bCryptRequest.getRounds()))
-                .peek(bCryptEntity -> {
+                .forEach(bCryptEntity -> {
                     bCryptEntity.setTaskEntity(task);
-                    ASYNC_TASKS.get(taskEntity.getTaskId()).getProgress().increase();
-                })
-                .toList();
-
-        bCryptRepository.saveAll(bcryptEntities);
+                    var progress = ASYNC_TASKS.get(taskEntity.getTaskId()).getProgress();
+                    progress.increase();
+                    log.info("TaskId={}, progress={}", task.getTaskId(), progress);
+                    bCryptService.save(bCryptEntity);
+                });
 
         finishTask(taskEntity.getId());
     }
 
-    private TaskEntity saveNewTask() {
+    private TaskEntity saveNewTask(int quantity) {
         var task = new TaskEntity();
         task.setTaskId(UUID.randomUUID().toString());
         task.setStatus(TaskStatus.ACCEPT);
+        task.setQuantity(quantity);
         taskRepository.save(task);
         return task;
     }
 
     private void cancelTask(String taskId) {
-        var task = taskRepository.findByTaskId(taskId).orElseThrow(() -> new IllegalStateException(
-                String.format("Task with taskId=%s is not saved", taskId)));
+        var task = taskRepository.findByTaskIdAndStatusIsNot(taskId, TaskStatus.CANCELED).orElseThrow(() -> new IllegalStateException(
+                String.format("Task with taskId=%s is not saved or was already canceled", taskId)));
         task.setStatus(TaskStatus.CANCELED);
         task.setFinished(LocalDateTime.now());
         taskRepository.save(task);

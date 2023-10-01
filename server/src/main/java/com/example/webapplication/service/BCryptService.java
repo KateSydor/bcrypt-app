@@ -2,6 +2,8 @@ package com.example.webapplication.service;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import com.example.webapplication.entity.BCryptEntity;
+import com.example.webapplication.repository.BCryptRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class BCryptService {
+
+    private final BCryptRepository bCryptRepository;
 
     public BCryptEntity encode(String originalPassword, int rounds) {
         BCryptEntity bCryptEntity = new BCryptEntity();
@@ -22,5 +26,10 @@ public class BCryptService {
         bCryptEntity.setVerifyResult(matches);
         bCryptEntity.setRounds(rounds);
         return bCryptEntity;
+    }
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void save(BCryptEntity bCryptEntity) {
+        bCryptRepository.saveAndFlush(bCryptEntity);
     }
 }
