@@ -8,6 +8,7 @@ import com.example.webapplication.service.TaskService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "clean-up.job.enabled", havingValue = "true")
 public class TaskCancelJob {
 
     private final TaskService taskService;
