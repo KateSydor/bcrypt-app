@@ -25,5 +25,4 @@ public class BCryptEntity {
     @ManyToOne
     @JoinColumn(name = "task_id")
     private TaskEntity taskEntity;
-
 }

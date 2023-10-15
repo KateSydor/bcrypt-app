@@ -2,10 +2,7 @@ package com.example.webapplication.service;
 
 import com.example.webapplication.dto.mapper.BCryptMapper;
 import com.example.webapplication.dto.request.BCryptRequest;
-import com.example.webapplication.dto.response.ApiError;
-import com.example.webapplication.dto.response.BCryptResponse;
-import com.example.webapplication.dto.response.TaskCancelResponse;
-import com.example.webapplication.dto.response.TaskCreationResponse;
+import com.example.webapplication.dto.response.*;
 import com.example.webapplication.entity.BCryptEntity;
 import com.example.webapplication.entity.TaskEntity;
 import com.example.webapplication.entity.TaskStatus;
@@ -17,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,7 +43,13 @@ public class TaskService {
     public TaskCreationResponse accept(BCryptRequest bcryptRequest) {
         log.info("accept({})", bcryptRequest);
         try {
-            var task = saveNewTask(bcryptRequest.getOriginalPasswords().size());
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            List<TaskEntity> userStartedTasks = new ArrayList<>(taskRepository.findAllByUserNameAndStatus(username, TaskStatus.STARTED));
+            List<TaskEntity> userAcceptedTasks =  new ArrayList<>(taskRepository.findAllByUserNameAndStatus(username, TaskStatus.ACCEPT));
+            if (userStartedTasks.size()+userAcceptedTasks.size() >= 2){
+                return new TaskCreationResponse(null, false, "Request limit exceeded!");
+            }
+            var task = saveNewTask(bcryptRequest.getOriginalPasswords().size(), username);
             var progress = new ProgressModel(bcryptRequest.getOriginalPasswords().size(), 0);
             var submittedTask = TASK_EXECUTORS.submit(() -> processTask(task, bcryptRequest));
             ASYNC_TASKS.put(task.getTaskId(), new TaskModel(submittedTask, progress));
@@ -99,11 +103,12 @@ public class TaskService {
         finishTask(taskEntity.getId());
     }
 
-    private TaskEntity saveNewTask(int quantity) {
+    private TaskEntity saveNewTask(int quantity, String username) {
         var task = new TaskEntity();
         task.setTaskId(UUID.randomUUID().toString());
         task.setStatus(TaskStatus.ACCEPT);
         task.setQuantity(quantity);
+        task.setUserName(username);
         taskRepository.save(task);
         return task;
     }
@@ -136,9 +141,9 @@ public class TaskService {
                 String.format("Task with id=%s is not saved", id)));
     }
 
-    public List<BCryptResponse> showTaskResult(Long Id) {
-        var task = taskRepository.findById(Id).orElseThrow(() -> new IllegalStateException(
-                String.format("Task with id=%s is not saved", Id)));
+    public List<BCryptResponse> showTaskResult(String taskId) {
+        TaskEntity task = taskRepository.findByTaskId(taskId).orElseThrow(() -> new IllegalStateException(
+                String.format("Task with taskId=%s is not saved or was already canceled", taskId)));
         var result = bCryptRepository.findAllByTaskEntity(task);
         List<BCryptResponse> responses = new ArrayList<>();
         for (BCryptEntity entity : result
@@ -146,6 +151,28 @@ public class TaskService {
             responses.add(BCryptMapper.MAPPER.fromEntityToResponse(entity));
         }
         return responses;
+    }
+
+    public List<UserTasksResponse> showAllUserTasks(){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<UserTasksResponse> responses = new ArrayList<>();
+        var tasks = taskRepository.findAllByUserName(username);
+        List<BCryptEntity> bCryptEntities;
+        List<BCryptResponse> bCryptResponses;
+        for (TaskEntity task:tasks
+             ) {
+            bCryptEntities = new ArrayList<>();
+            bCryptResponses = new ArrayList<>();
+            bCryptEntities.addAll(bCryptRepository.findAllByTaskEntity(task));
+            for (BCryptEntity entity : bCryptEntities
+            ) {
+                bCryptResponses.add(BCryptMapper.MAPPER.fromEntityToResponse(entity));
+            }
+            responses.add(new UserTasksResponse(task.getId(), task.getStarted(), task.getFinished(), bCryptResponses));
+        }
+
+        return responses;
+
     }
 
 }

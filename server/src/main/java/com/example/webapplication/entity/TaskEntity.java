@@ -29,4 +29,7 @@ public class TaskEntity {
     @OneToMany(mappedBy = "taskEntity")
     private List<BCryptEntity> bCryptEntities;
 
+    @Column(name = "username")
+    private String userName;
+
 }

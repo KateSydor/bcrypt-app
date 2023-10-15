@@ -2,8 +2,10 @@ package com.example.webapplication.controller;
 
 import com.example.webapplication.dto.request.LoginRequest;
 import com.example.webapplication.dto.request.RegisterRequest;
+import com.example.webapplication.dto.response.ApiError;
 import com.example.webapplication.entity.UserEntity;
 import com.example.webapplication.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,27 +31,25 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<String> authenticateUser(@RequestBody @Valid LoginRequest loginRequest){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>("User login successfully!.", HttpStatus.OK);
+        return ResponseEntity.ok().body("{\"message\":\"User sign in successfully\"}");
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest){
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest){
 
-        // add check for username exists in a DB
         if(userRepository.existsByUsername(registerRequest.getUsername())){
-            return new ResponseEntity<>("Username is already taken!", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new ApiError(HttpStatus.BAD_REQUEST.value(), "Username is already taken!"));
+
         }
 
-        // add check for email exists in DB
         if(userRepository.existsByEmail(registerRequest.getEmail())){
-            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new ApiError(HttpStatus.BAD_REQUEST.value(), "Email is already taken!"));
         }
 
-        // create user object
         UserEntity user = new UserEntity();
         user.setUsername(registerRequest.getUsername());
         user.setUsername(registerRequest.getUsername());
@@ -58,7 +58,7 @@ public class UserController {
 
         userRepository.save(user);
 
-        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+        return ResponseEntity.ok().body("{\"message\":\"User registered successfully\"}");
 
     }
 }

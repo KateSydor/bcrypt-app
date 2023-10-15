@@ -12,6 +12,9 @@ import java.util.Set;
 
 public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
     Optional<TaskEntity> findByTaskIdAndStatusIsNot(String taskId, TaskStatus status);
+    List<TaskEntity> findAllByUserName(String username);
+
+    List<TaskEntity> findAllByUserNameAndStatus(String username, TaskStatus status);
 
     @Query("""
             select
@@ -26,4 +29,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
                 where task.taskId in (:activeTaskIds) and task.status = :taskStatus
             """)
     List<TaskEntity> getTaskIdsForCancel(Set<String> activeTaskIds, TaskStatus taskStatus);
+
+    Optional<TaskEntity> findByTaskId(String taskId);
 }
