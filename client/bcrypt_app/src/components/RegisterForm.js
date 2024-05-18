@@ -28,7 +28,7 @@ function RegisterForm(callback) {
         e.preventDefault();
 
         if (formData.username === '' || formData.password === '' || formData.email === '') {
-            setMessage('Fields cannot be empty');
+            setMessage('Поля не можуть бути порожніми!');
             setShowAlert(true);
             return;
         }
@@ -46,7 +46,7 @@ function RegisterForm(callback) {
                 if (data.message === 'User registered successfully') {
                     navigate('/signin');
                 }else {
-                    setMessage("Incorrect data input");
+                    setMessage("Некоректні дані");
                     setShowAlert(true);
                 }
             })
@@ -66,12 +66,12 @@ function RegisterForm(callback) {
 
     return (
         <div className="container">
-            <h2>Registration Form</h2>
+            <h2>Реєстрація</h2>
             <form onSubmit={handleSubmit}>
                 <input
                     type="email"
                     name="email"
-                    placeholder="Email"
+                    placeholder="Пошта"
                     value={formData.email}
                     onChange={handleChange}
                     className="input-field"
@@ -79,7 +79,7 @@ function RegisterForm(callback) {
                 <input
                     type="password"
                     name="password"
-                    placeholder="Password"
+                    placeholder="Пароль"
                     value={formData.password}
                     onChange={handleChange}
                     className="input-field"
@@ -87,18 +87,18 @@ function RegisterForm(callback) {
                 <input
                     type="text"
                     name="username"
-                    placeholder="Username"
+                    placeholder="Ім'я користувача"
                     value={formData.username}
                     onChange={handleChange}
                     className="input-field"
                 />
                 <button type="submit" className="confirm-button">
-                    Register
+                    Зареєструваись
                 </button>
                 {showAlert && (
                     <CustomAlert message={message} onClose={handleCloseAlert} />
                 )}
-                <button className="have-account" onClick={handleSignIn}>I already have an account</button>
+                <button className="have-account" onClick={handleSignIn}>В мене вже є акаунт</button>
             </form>
         </div>
     );

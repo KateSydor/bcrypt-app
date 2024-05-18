@@ -53,32 +53,32 @@ function HistoryPage() {
             <div>
                 <div className="test">
                     <br />
-                    <span className="title-text">Bcrypt Hash Generator & Verifier</span>
+                    <span className="title-text">Генератор і верифікатор хешу Bcrypt</span>
                     <br />
-                    <span className="title-text-description">Generate password hashes with bcrypt algorithm</span>
+                    <span className="title-text-description">Генеруйте хеші паролів за допомогою алгоритму bcrypt</span>
                 </div>
             </div>
 
             <header>
                 <div className="header-content">
                     <button className="header-button" onClick={handleBCrypt}>BCrypt</button>
-                    <button className="header-button" onClick={handleHistory}>History</button>
-                    <button className="header-button" onClick={handleLogOut}>Log Out</button>
-                    <span className="username">Username: {user_name}</span>
+                    <button className="header-button" onClick={handleHistory}>Історія</button>
+                    <button className="header-button" onClick={handleLogOut}>Вихід</button>
+                    <span className="username">Ім'я користувача: {user_name}</span>
                 </div>
             </header>
 
             <main className="main-content">
                 <div className="App">
-                    <h1>Entities Table</h1>
+                    <h1>Таблиця хешів</h1>
                     <div className="table-container">
                     <table>
                         <thead>
                         <tr>
-                            <th>Task ID</th>
-                            <th>Started</th>
-                            <th>Finished</th>
-                            <th>Bcrypt Response List</th>
+                            <th>Номер завдання</th>
+                            <th>Почато</th>
+                            <th>Закінчено</th>
+                            <th>Bcrypt хеші</th>
                         </tr>
                         </thead>
                         <tbody>

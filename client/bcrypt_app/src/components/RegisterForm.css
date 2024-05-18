@@ -13,7 +13,6 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    background-image: url('/home/beaver/IdeaProjects/bcrypt-app/client/bcrypt_app/src/images/bcrypt_app.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;

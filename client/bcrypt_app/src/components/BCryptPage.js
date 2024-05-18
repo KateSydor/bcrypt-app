@@ -14,7 +14,7 @@ function YourPage() {
         if (passwords.length < 10) {
             setPasswords([...passwords, '']);
         } else {
-            setMessage("You can\'t add more then 10 passwords!");
+            setMessage("Ви не можете додати більше 10 паролів!");
             setShowAlert(true);
         }
     };
@@ -33,7 +33,7 @@ function YourPage() {
 
         for (let p of passwords){
             if (p === ''){
-                setMessage('Fields cannot be empty');
+                setMessage('Поля не можуть бути порожніми');
                 setShowAlert(true);
                 return;
             }
@@ -56,7 +56,7 @@ function YourPage() {
             .then((response) => response.json())
             .then((result) => {
                 if(result.message === "Request limit exceeded!"){
-                    setMessage('Request limit exceeded! Wait for finishing one of your previous request');
+                    setMessage('Ліміт запитів перевищено! Дочекайтеся завершення одного з ваших попередніх запитів');
                     setShowAlert(true);
                     return;
                 }
@@ -90,49 +90,49 @@ function YourPage() {
         <div className="bcrypt-page">
             <div>
                 <div className="test">
-                    <br />
-                    <span className="title-text">Bcrypt Hash Generator & Verifier</span>
-                    <br />
-                    <span className="title-text-description">Generate password hashes with bcrypt algorithm</span>
+                    <br/>
+                    <span className="title-text">Генератор і верифікатор хешу Bcrypt</span>
+                    <br/>
+                    <span className="title-text-description">Генеруйте хеші паролів за допомогою алгоритму bcrypt</span>
                 </div>
             </div>
 
             <header>
                 <div className="header-content">
                     <button className="header-button" onClick={handleBCrypt}>BCrypt</button>
-                    <button className="header-button" onClick={handleHistory}>History</button>
-                    <button className="header-button" onClick={handleLogOut}>Log Out</button>
-                    <span className="username">Username: {user_name}</span>
+                    <button className="header-button" onClick={handleHistory}>Історія</button>
+                    <button className="header-button" onClick={handleLogOut}>Вихід</button>
+                    <span className="username">Ім'я користуваа: {user_name}</span>
                 </div>
             </header>
 
             <main className="home-page">
                 <div>
-                    <p className="main-text">Bcrypt Hash Generator</p>
+                    <p className="main-text">Bcrypt генератор</p>
                 </div>
                 <div className="password-inputs">
                     {passwords.map((password, index) => (
                         <input
                             key={index}
                             type="text"
-                            placeholder="Password"
+                            placeholder="Пароль"
                             value={password}
                             onChange={(e) => handlePasswordChange(index, e.target.value)}
                         />
                     ))}
                     <button className="confirm-button" onClick={addPasswordField}>
-                        Add Password
+                        Додати пароль
                     </button>
                 </div>
                 <div className="rounds-input">
-                    <label htmlFor="rounds">Rounds:</label>
+                    <label htmlFor="rounds">Раунди:</label>
                     <select
                         id="rounds"
                         value={rounds}
                         onChange={(e) => setRounds(parseInt(e.target.value))}
                         onInput={(e) => e.preventDefault()}
                     >
-                        {Array.from({ length: 27 }, (_, i) => i + 4).map((round) => (
+                        {Array.from({length: 27}, (_, i) => i + 4).map((round) => (
                             <option key={round} value={round}>
                                 {round}
                             </option>
@@ -141,10 +141,10 @@ function YourPage() {
                 </div>
 
                 <button className="confirm-button" onClick={handleConfirm}>
-                    Confirm
+                    Підтвердити
                 </button>
                 {showAlert && (
-                    <CustomAlert message={message} onClose={handleCloseAlert} />
+                    <CustomAlert message={message} onClose={handleCloseAlert}/>
                 )}
             </main>
         </div>

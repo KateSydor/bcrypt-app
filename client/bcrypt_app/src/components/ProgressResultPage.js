@@ -48,7 +48,7 @@ function ProgressResultPage() {
             .then((response) => response.json())
             .then((result) => {
                 setTaskResult(result);
-                console.log('Task Result:', result);
+                console.log('Результат:', result);
             })
             .catch((error) => console.error('Fetch error:', error));
     };
@@ -58,13 +58,13 @@ function ProgressResultPage() {
             fetch('http://localhost:8080/task/cancel?taskId=' + taskId, requestOptions)
                 .then((response) => response.json())
                 .then((result) => {
-                    console.log('Cancel:', result);
+                    console.log('Скасовано:', result);
                     navigate('/home');
                 })
                 .catch((error) => console.error('Fetch error:', error));
         }
         else{
-            setMessage('You can\'t cancel finished task!');
+            setMessage('Ви не можете скасувати завершене завдання!');
             setShowAlert(true);
         }
     };
@@ -103,65 +103,66 @@ function ProgressResultPage() {
         <div className="bcrypt-page">
             <div>
                 <div className="test">
-                    <br />
-                    <span className="title-text">Bcrypt Hash Generator & Verifier</span>
-                    <br />
-                    <span className="title-text-description">Generate password hashes with bcrypt algorithm</span>
+                    <br/>
+                    <span className="title-text">Генератор і верифікатор хешу Bcrypt</span>
+                    <br/>
+                    <span className="title-text-description">Генеруйте хеші паролів за допомогою алгоритму bcrypt</span>
                 </div>
             </div>
 
             <header>
                 <div className="header-content">
                     <button className="header-button" onClick={handleBCrypt}>BCrypt</button>
-                    <button className="header-button" onClick={handleHistory}>History</button>
-                    <button className="header-button" onClick={handleLogOut}>Log Out</button>
-                    <span className="username">Username: {user_name}</span>
+                    <button className="header-button" onClick={handleHistory}>Історія</button>
+                    <button className="header-button" onClick={handleLogOut}>Вихід</button>
+                    <span className="username">Ім'я користувача: {user_name}</span>
                 </div>
             </header>
 
             <main className="main">
                 <div className="App">
-                    <h1>Task progress</h1>
+                    <h1>Прогрес виконання завдання</h1>
                     <div className="table-container">
                         <table>
                             <thead>
                             <tr>
-                                <th>Total passwords</th>
-                                <th>Already hashed</th>
+                                <th>Кількість паролів</th>
+                                <th>Вже захешовано</th>
                             </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>{userTaskProgress.totalHash}</td>
-                                    <td>{userTaskProgress.doneHash}</td>
-                                </tr>
+                            <tr>
+                                <td>{userTaskProgress.totalHash}</td>
+                                <td>{userTaskProgress.doneHash}</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
                     <div>
-                        <button className="confirm-button" onClick={handleShowTaskResult}>Show Task Result</button>
-                        <button className="confirm-button cancel-button" onClick={handleCancelTask}>Cancel Task</button>
+                        <button className="confirm-button" onClick={handleShowTaskResult}>Показати результат завдання</button>
+                        <button className="confirm-button cancel-button" onClick={handleCancelTask}>Скасувати завдання</button>
                         {showAlert && (
-                            <CustomAlert message={message} onClose={handleCloseAlert} />
+                            <CustomAlert message={message} onClose={handleCloseAlert}/>
                         )}
                     </div>
                     {taskResult && (
                         <div>
-                            <h2>Task Result:</h2>
+                            <h2>Результат виконання завдання:</h2>
                             <div className="table-container">
                                 <table>
                                     <tbody>
                                     {taskResult.map((entity, index) => (
                                         <tr key={index}>
-                                            <td><ul>
+                                            <td>
+                                                <ul>
                                                     <li key={entity.id}>
-                                                        <div>ID: {entity.id}</div>
-                                                        <div>Original Password: {entity.originalPassword}</div>
-                                                        <div>Hashed Password: {entity.hashedPassword}</div>
-                                                        <div>Verify Result: {entity.verifyResult.toString()}</div>
-                                                        <div>Rounds: {entity.rounds}</div>
+                                                        <div>Номер: {entity.id}</div>
+                                                        <div>Початковий пароль: {entity.originalPassword}</div>
+                                                        <div>Захешований пароль: {entity.hashedPassword}</div>
+                                                        <div>Результат верифікації: {entity.verifyResult.toString()}</div>
+                                                        <div>К-сть раундів: {entity.rounds}</div>
                                                     </li>
-                                            </ul>
+                                                </ul>
                                             </td>
                                         </tr>
                                     ))}

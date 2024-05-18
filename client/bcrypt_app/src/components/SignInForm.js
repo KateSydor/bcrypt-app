@@ -29,7 +29,7 @@ function SignIn(callback) {
         e.preventDefault();
 
         if (formData.username === '' || formData.password === '') {
-            setMessage('Fields cannot be empty');
+            setMessage('Поля не можуть бути порожніми!');
             setShowAlert(true);
             return;
         }
@@ -49,7 +49,7 @@ function SignIn(callback) {
                     sessionStorage.setItem('password', formData.password);
                     navigate('/home');
                 }else {
-                    setMessage("Incorrect user credentials");
+                    setMessage("Некоректні дані");
                     setShowAlert(true);
                 }
             })
@@ -67,12 +67,12 @@ function SignIn(callback) {
 
     return (
         <div className="container">
-            <h2>Sign In Form</h2>
+            <h2>Вхід</h2>
             <form onSubmit={handleSubmit}>
                 <input
                     type="text"
                     name="username"
-                    placeholder="Username"
+                    placeholder="Ім я користувача"
                     value={formData.username}
                     onChange={handleChange}
                     className="input-field"
@@ -80,18 +80,18 @@ function SignIn(callback) {
                 <input
                     type="password"
                     name="password"
-                    placeholder="Password"
+                    placeholder="Пароль"
                     value={formData.password}
                     onChange={handleChange}
                     className="input-field"
                 />
                 <button type="submit" className="confirm-button">
-                    Sign In
+                    Увійти
                 </button>
                 {showAlert && (
                     <CustomAlert message={message} onClose={handleCloseAlert} />
                 )}
-                <button className="have-account" onClick={handleRegister}>I haven't an account</button>
+                <button className="have-account" onClick={handleRegister}>В мене немає акаунта</button>
             </form>
         </div>
     );
